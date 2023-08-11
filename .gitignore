@@ -1,0 +1,66 @@
+# custom
+/dist
+# large json files
+/data/customersOrdersSeasonsAll.json
+/data/customersOrdersSeasons.json
+/data/seasonsCustomersOrders.json
+# dependencies
+/node_modules
+package-lock.json
+# testing
+/coverage
+sample_customers.csv
+test.py
+__pycache__
+# production
+/build
+# misc
+.DS_Store
+.env
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+```
+create a .dockerignore file:
+```
+node_modules
+npm-debug.log
+```
+create a Dockerfile:
+```
+# build environment
+FROM node:alpine as builder
+WORKDIR /app
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
+COPY . .
+RUN yarn build
+
+# production environment
+FROM nginx:stable-alpine
+COPY --from=builder /app/build /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+create a docker-compose.yml file:
+```
+version: "3.7"
+services:
+  web:
+    build: .
+    ports:
+      - "3000:80"
+    volumes:
+      - .:/app
+```
+run the following command:
+```
+docker-compose up --build
+```
+You should see the following output:
+```
+web_1  | 
+web_1  | > docker-react@0.1.0 start /app
+web_1  | > react-scripts start
+web_1  | 
+web_1  | ℹ ｢wds｣: Project is running at http://
